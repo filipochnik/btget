@@ -16,9 +16,6 @@ func Marshal(data interface{}) (result []byte, err error) {
 			if _, ok := r.(runtime.Error); ok {
 				panic(r)
 			}
-			if s, ok := r.(string); ok {
-				panic(s)
-			}
 			err = r.(error)
 		}
 	}()
@@ -56,6 +53,8 @@ func (ms *marshalState) marshal(data reflect.Value) {
 			panic(makeTypeError(data))
 		}
 		ms.marshalMap(data)
+	case reflect.Struct:
+		ms.marshalStruct(data)
 	case reflect.Interface:
 		ms.marshal(data.Elem())
 	default:
@@ -110,4 +109,29 @@ func (ms *marshalState) marshalMap(m reflect.Value) {
 		ms.marshal(m.MapIndex(k))
 	}
 	ms.WriteByte('e')
+}
+
+func (ms *marshalState) marshalStruct(s reflect.Value) {
+	ms.WriteByte('d')
+	fields := getAllExportedFields(s)
+	sort.Slice(
+		fields,
+		func(i, j int) bool { return fields[i].Name < fields[j].Name },
+	)
+	for _, f := range fields {
+		ms.marshalBytes([]byte(f.Name))
+		ms.marshal(s.FieldByName(f.Name))
+	}
+	ms.WriteByte('e')
+}
+
+func getAllExportedFields(s reflect.Value) (fields []reflect.StructField) {
+	for i := 0; i < s.NumField(); i++ {
+		field := s.Type().Field(i)
+		if field.Anonymous || field.PkgPath != "" {
+			continue
+		}
+		fields = append(fields, field)
+	}
+	return fields
 }
