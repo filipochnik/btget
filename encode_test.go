@@ -2,6 +2,7 @@ package bencode
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -66,5 +67,28 @@ func TestMarshal(t *testing.T) {
 	}
 }
 
-// TODO invalid test cases
+func TestMarshalInvalid(t *testing.T) {
+	var testCases = []struct {
+		in          interface{}
+		errContains string
+	}{
+		{[]chan int{make(chan int)}, "unsupported type"},
+		{map[int]int{1: 1}, "cannot unmarshal map"},
+	}
+	for _, tc := range testCases {
+		_, err := Marshal(tc.in)
+		assertErrContains(t, err, tc.errContains)
+	}
+
+}
+
+func assertErrContains(t *testing.T, err error, contains string) {
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if !strings.Contains(err.Error(), contains) {
+		t.Fatalf("expected error containing \"%s\", got \"%s\" instead", contains, err.Error())
+	}
+}
+
 // TODO property checking

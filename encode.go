@@ -10,15 +10,7 @@ import (
 )
 
 func Marshal(data interface{}) (result []byte, err error) {
-	// TODO maybe we can do better
-	defer func() {
-		if r := recover(); r != nil {
-			if _, ok := r.(runtime.Error); ok {
-				panic(r)
-			}
-			err = r.(error)
-		}
-	}()
+	defer handlePanic(&err)
 	ms := new(marshalState)
 	ms.marshal(reflect.ValueOf(data))
 	result = ms.Bytes()
@@ -49,8 +41,7 @@ func (ms *marshalState) marshal(data reflect.Value) {
 	case reflect.Map:
 		keyKind := data.Type().Key().Kind()
 		if keyKind != reflect.String {
-			// TODO
-			panic(makeTypeError(data))
+			panic(fmt.Errorf("cannot unmarshal map with key type %t", data.Interface()))
 		}
 		ms.marshalMap(data)
 	case reflect.Struct:
@@ -58,13 +49,9 @@ func (ms *marshalState) marshal(data reflect.Value) {
 	case reflect.Interface:
 		ms.marshal(data.Elem())
 	default:
-		// TODO
-		panic(makeTypeError(data))
+		panic(fmt.Errorf("err: %v has unsupported type %v",
+			data.Interface(), data.Kind()))
 	}
-}
-
-func makeTypeError(v reflect.Value) error {
-	return fmt.Errorf("err: %v has unsupported type %v", v.Interface(), v.Kind())
 }
 
 func (ms *marshalState) marshalBytes(bs []byte) {
@@ -112,6 +99,7 @@ func (ms *marshalState) marshalMap(m reflect.Value) {
 }
 
 func (ms *marshalState) marshalStruct(s reflect.Value) {
+	// TODO: handle tags
 	ms.WriteByte('d')
 	fields := getAllExportedFields(s)
 	sort.Slice(
@@ -134,4 +122,13 @@ func getAllExportedFields(s reflect.Value) (fields []reflect.StructField) {
 		fields = append(fields, field)
 	}
 	return fields
+}
+
+func handlePanic(err *error) {
+	if r := recover(); r != nil {
+		if _, ok := r.(runtime.Error); ok {
+			panic(r)
+		}
+		*err = r.(error)
+	}
 }

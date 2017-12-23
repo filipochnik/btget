@@ -131,6 +131,38 @@ func TestUnmarshalDict2Struct(t *testing.T) {
 				tt.in, tt.out, tt.out, res, res)
 		}
 	}
+}
+
+func TestUnmarshalInvalid(t *testing.T) {
+	var i int
+	var s string
+	var m map[string]interface{}
+	var mInt map[int]interface{}
+	var dummyRes interface{}
+
+	err := Unmarshal([]byte("i1e"), i)
+	assertErrContains(t, err, "cannot unmarshal into non-ptr")
+
+	err = Unmarshal([]byte("3:foo"), &i)
+	assertErrContains(t, err, "cannot unmarshal bytes into int")
+
+	err = Unmarshal([]byte("de"), &s)
+	assertErrContains(t, err, "cannot unmarshal dict into string")
+
+	err = Unmarshal([]byte("li1ee"), &m)
+	assertErrContains(t, err, "cannot unmarshal list into map")
+
+	err = Unmarshal([]byte("d1:a1:be"), &mInt)
+	assertErrContains(t, err, "map keys must be of type string")
+
+	err = Unmarshal([]byte("3foo"), &dummyRes)
+	assertErrContains(t, err, "EOF")
+
+	err = Unmarshal([]byte("li1e"), &dummyRes)
+	assertErrContains(t, err, "EOF")
+
+	err = Unmarshal([]byte("di1ei3ee"), &dummyRes)
+	assertErrContains(t, err, "cannot unmarshal integer into string")
 
 }
 
