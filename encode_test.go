@@ -16,6 +16,9 @@ func TestMarshal(t *testing.T) {
 		Ts TestStruct
 		Hi string
 	}
+	type TestStruct3 struct {
+		Pizza string `bencode:"pizza"`
+	}
 	var testCases = []struct {
 		in  interface{}
 		out string
@@ -54,6 +57,7 @@ func TestMarshal(t *testing.T) {
 			},
 			"d2:Hi5:Hello2:Tsd3:Bari1e3:Foo3:benee",
 		},
+		{TestStruct3{Pizza: "cool"}, "d5:pizza4:coole"},
 	}
 
 	for _, tc := range testCases {

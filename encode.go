@@ -99,21 +99,20 @@ func (ms *marshalState) marshalMap(m reflect.Value) {
 }
 
 func (ms *marshalState) marshalStruct(s reflect.Value) {
-	// TODO: handle tags
 	ms.WriteByte('d')
-	fields := getAllExportedFields(s)
+	fields := getExportedFields(s)
 	sort.Slice(
 		fields,
-		func(i, j int) bool { return fields[i].Name < fields[j].Name },
+		func(i, j int) bool { return bencodeName(fields[i]) < bencodeName(fields[j]) },
 	)
 	for _, f := range fields {
-		ms.marshalBytes([]byte(f.Name))
+		ms.marshalBytes([]byte(bencodeName(f)))
 		ms.marshal(s.FieldByName(f.Name))
 	}
 	ms.WriteByte('e')
 }
 
-func getAllExportedFields(s reflect.Value) (fields []reflect.StructField) {
+func getExportedFields(s reflect.Value) (fields []reflect.StructField) {
 	for i := 0; i < s.NumField(); i++ {
 		field := s.Type().Field(i)
 		if field.Anonymous || field.PkgPath != "" {
@@ -122,6 +121,13 @@ func getAllExportedFields(s reflect.Value) (fields []reflect.StructField) {
 		fields = append(fields, field)
 	}
 	return fields
+}
+
+func bencodeName(field reflect.StructField) string {
+	if tag, ok := field.Tag.Lookup("bencode"); ok {
+		return tag
+	}
+	return field.Name
 }
 
 func handlePanic(err *error) {

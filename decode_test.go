@@ -165,5 +165,3 @@ func TestUnmarshalInvalid(t *testing.T) {
 	assertErrContains(t, err, "cannot unmarshal integer into string")
 
 }
-
-// TODO invalid test cases
