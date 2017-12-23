@@ -149,6 +149,9 @@ func TestUnmarshalInvalid(t *testing.T) {
 	err = Unmarshal([]byte("de"), &s)
 	assertErrContains(t, err, "cannot unmarshal dict into string")
 
+	err = Unmarshal([]byte("9999999:"), &s)
+	assertErrContains(t, err, "EOF")
+
 	err = Unmarshal([]byte("li1ee"), &m)
 	assertErrContains(t, err, "cannot unmarshal list into map")
 

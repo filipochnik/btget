@@ -94,5 +94,3 @@ func assertErrContains(t *testing.T, err error, contains string) {
 		t.Fatalf("expected error containing \"%s\", got \"%s\" instead", contains, err.Error())
 	}
 }
-
-// TODO property checking
