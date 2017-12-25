@@ -2,6 +2,7 @@ package bencode
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -134,7 +135,13 @@ func handlePanic(err *error) {
 	if r := recover(); r != nil {
 		if _, ok := r.(runtime.Error); ok {
 			panic(r)
+		} else if _, ok := r.(error); ok {
+			*err = r.(error)
+		} else if _, ok := r.(string); ok {
+			*err = errors.New(r.(string))
+		} else {
+			panic(r)
 		}
-		*err = r.(error)
+
 	}
 }
