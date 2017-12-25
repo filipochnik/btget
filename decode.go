@@ -79,6 +79,7 @@ func (us *unmarshalState) unmarshalList(v reflect.Value) {
 
 	for i := 0; ; i++ {
 		if us.peekByte() == 'e' {
+			us.skipByte()
 			break
 		}
 		unmarshalElem(i)
@@ -156,6 +157,7 @@ func (us *unmarshalState) unmarshalDict2Map(v reflect.Value) {
 
 	for {
 		if us.peekByte() == 'e' {
+			us.skipByte()
 			break
 		}
 
@@ -173,6 +175,7 @@ func (us *unmarshalState) unmarshalDict2Struct(v reflect.Value) {
 	fields := structFields(v)
 	for {
 		if us.peekByte() == 'e' {
+			us.skipByte()
 			break
 		}
 

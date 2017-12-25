@@ -26,6 +26,14 @@ func TestUnmarshal(t *testing.T) {
 
 		{"d3:foo3:bar5:pizza4:coole",
 			map[string]interface{}{"foo": []byte("bar"), "pizza": []byte("cool")}},
+		{"d1:all1:ael1:beee",
+			map[string]interface{}{
+				"a": []interface{}{
+					[]interface{}{[]byte("a")},
+					[]interface{}{[]byte("b")},
+				},
+			},
+		},
 	}
 	for _, tt := range testCases {
 		var res interface{}
