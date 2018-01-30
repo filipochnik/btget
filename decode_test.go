@@ -85,8 +85,9 @@ func TestUnmarshalDict2Struct(t *testing.T) {
 		baz int
 	}
 	type TestStruct2 struct {
-		Ts TestStruct
-		Hi string
+		Ts          TestStruct
+		Hi          string
+		NotIncluded string `bencode:"-"`
 	}
 
 	testCases1 := []struct {

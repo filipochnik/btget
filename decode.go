@@ -259,10 +259,14 @@ func structFields(s reflect.Value) map[string]reflect.Value {
 			continue
 		}
 		structField := s.Type().Field(i)
-		fields[structField.Name] = fieldValue
-		if tag, ok := structField.Tag.Lookup("bencode"); ok {
+		tag, ok := structField.Tag.Lookup("bencode")
+		if ok && tag == "-" {
+			continue
+		}
+		if ok {
 			fields[tag] = fieldValue
 		}
+		fields[structField.Name] = fieldValue
 	}
 	return fields
 }

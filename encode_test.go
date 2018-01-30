@@ -17,7 +17,8 @@ func TestMarshal(t *testing.T) {
 		Hi string
 	}
 	type TestStruct3 struct {
-		Pizza string `bencode:"pizza"`
+		Pizza       string `bencode:"pizza"`
+		NotIncluded string `bencode:"-"`
 	}
 	var testCases = []struct {
 		in  interface{}

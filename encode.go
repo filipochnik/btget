@@ -119,6 +119,9 @@ func getExportedFields(s reflect.Value) (fields []reflect.StructField) {
 		if field.Anonymous || field.PkgPath != "" {
 			continue
 		}
+		if bencodeName(field) == "-" {
+			continue
+		}
 		fields = append(fields, field)
 	}
 	return fields
